@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "es2015",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "declaration": true,
+    "outDir": "dist/",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "lib": [ "es2015", "dom" ],
+  "files": [
+    "index.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "typings/global",
+    "typings/global.d.ts"
+  ],
+  "compileOnSave": true
+}

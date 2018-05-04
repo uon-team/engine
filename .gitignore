@@ -1,0 +1,9 @@
+*.DS_Store
+*.project
+*.settings
+/docs
+/node_modules
+/typings
+/dist
+/.vscode
+*.log

@@ -1,0 +1,36 @@
+{
+  "name": "@uon/engine",
+  "version": "0.1.0",
+  "description": "A game engine framework (WebGL2)",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "tsc -p ./ --outDir dist/"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.10",
+    "@uon/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/reflect-metadata": "0.0.5",
+    "@types/webgl2": "0.0.3",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uon-team/engine.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Gabriel Roy",
+    "email": "gab@uon.io",
+    "url": "https://uon.io"
+  },
+  "keywords": [
+    "uon",
+    "3d",
+    "webgl",
+    "typescript"
+  ]
+}
