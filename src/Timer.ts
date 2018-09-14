@@ -1,6 +1,9 @@
 
 
 
+/**
+ * A simple timer
+ */
 export class Timer {
 
     private _startMS: number = 0;
@@ -12,15 +15,25 @@ export class Timer {
 
     }
 
+    /**
+     * The delta between the last updates
+     */
     get delta() {
         return this._deltaMS;
     }
 
+    /**
+     * Start the timer
+     */
     start() {
         this._startMS = Date.now();
         this._lastUpdateMS = this._startMS;
     }
 
+
+    /**
+     * Update the timer
+     */
     update() {
 
         let now = Date.now();

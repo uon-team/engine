@@ -3,17 +3,15 @@ import { RenderState, DEFAULT_RENDER_STATE, RENDER_STATE_FUNC_MAP } from './Rend
 import { ShaderProgram } from './Shader';
 import { RenderTarget } from './RenderTarget';
 
+const STATE_KEYS = Object.keys(DEFAULT_RENDER_STATE);
 
-
-
-
+/**
+ * Interface to set the state of the gl context
+ */
 export class StateManager {
 
+    // current states
     private _current: RenderState;
-    private _stateKeys: string[];
-    private _toggles: string[] = [];
-
-
 
     // current program
     private _program: ShaderProgram;
@@ -22,18 +20,21 @@ export class StateManager {
     private _framebuffer: RenderTarget;
 
 
-
+    /**
+     * @constructs
+     * @param _gl 
+     */
     constructor(private _gl: WebGL2RenderingContext) {
 
         this._current = {};
-
-        this._stateKeys = Object.keys(DEFAULT_RENDER_STATE);
-
 
         this.sync();
 
     }
 
+    /**
+     * Set the shader program
+     */
     set program(val: ShaderProgram) {
 
         if (!val || val == this._program) {
@@ -45,10 +46,16 @@ export class StateManager {
 
     }
 
+    /**
+     * Get the currently set shader program
+     */
     get program() {
         return this._program;
     }
 
+    /**
+     * Set the framebuffer on which to render, or null for the primary framebuffer 
+     */
     set framebuffer(val: RenderTarget) {
 
         const gl = this._gl;
@@ -60,11 +67,18 @@ export class StateManager {
 
     }
 
+    /**
+     * Get the currently set framebuffer
+     */
     get framebuffer() {
         return this._framebuffer;
     }
 
 
+    /**
+     * Apply the diffs between a new render state and the previous one
+     * @param rs 
+     */
     apply(rs: RenderState) {
 
         const gl = this._gl;
@@ -73,8 +87,8 @@ export class StateManager {
 
         let key: string;
         let val: any;
-        for (let i = 0, l = this._stateKeys.length; i < l; ++i) {
-            key = this._stateKeys[i];
+        for (let i = 0, l = STATE_KEYS.length; i < l; ++i) {
+            key = STATE_KEYS[i];
 
             if (next[key] === undefined || curr[key] === next[key]) {
                 continue;
@@ -94,6 +108,9 @@ export class StateManager {
 
 
 
+    /**
+     * Sync the currently the GL render states
+     */
     sync() {
 
         const GL = this._gl;

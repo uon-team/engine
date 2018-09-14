@@ -1,4 +1,4 @@
-import { Type, StringUtils, FindMetadataOfType, CreateMetadataCtor, GetOrDefineMetadata, META_ANNOTATIONS, META_PROPERTIES } from '@uon/core';
+import { Type, StringUtils, FindMetadataOfType, CreateMetadataCtor, GetOrDefineMetadata, META_ANNOTATIONS, META_PROPERTIES, TypeDecorator, MakeTypeDecorator } from '@uon/core';
 import { GL_CONSTANT } from './GLConstant';
 
 
@@ -46,6 +46,25 @@ export interface FragmentOutput {
 }
 
 
+export interface ShaderDeclarationDecorator {
+    (meta: ShaderDeclaration): TypeDecorator;
+    new(meta: ShaderDeclaration): ShaderDeclaration
+}
+
+
+/**
+ * Decorator for defining shader parts
+ * @param e 
+ */
+export const ShaderDeclaration: ShaderDeclarationDecorator = MakeTypeDecorator(
+    "ShaderDeclaration",
+    (meta: ShaderDeclaration) => meta,
+    null,
+    (cls: any, meta: ShaderDeclaration) => {
+
+    }
+);
+
 export interface ShaderDeclaration {
 
     deps?: Type<any>[];
@@ -65,36 +84,6 @@ export interface ShaderDeclaration {
 }
 
 
-/**
- * Decorator for defining shader parts
- * @param e 
- */
-export function ShaderDeclaration(e: ShaderDeclaration) {
-
-    const meta_ctor = CreateMetadataCtor((meta: ShaderDeclaration) => meta);
-    if (this instanceof ShaderDeclaration) {
-        meta_ctor.apply(this, arguments);
-        return this;
-    }
-
-    return function ShaderDeclarationDecorator(target: any) {
-
-
-        // get annotations array for this type
-        let annotations = GetOrDefineMetadata(META_ANNOTATIONS, target, []);
-
-
-        // create the metadata
-        let meta_instance = new (<any>ShaderDeclaration)(e);
-
-
-        // push the metadata
-        annotations.push(meta_instance);
-
-
-        return target;
-    }
-}
 
 
 /**
@@ -241,7 +230,7 @@ export class ShaderProgram {
 
         // extract uniforms
         attr_count = _gl.getProgramParameter(id, _gl.ACTIVE_UNIFORMS);
-       
+
         for (let i = 0; i < attr_count; i++) {
 
             let attr = _gl.getActiveUniform(id, i);

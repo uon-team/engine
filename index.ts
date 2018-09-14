@@ -27,13 +27,13 @@ export { Timer } from './src/Timer';
 
 // display
 export { GL_CONSTANT } from './src/display/GLConstant';
-export { ShaderDeclaration, VertexShader, FragmentShader, ShaderProgram, ShaderDataType } from './src/display/Shader';
-export { Material, Uniform } from './src/display/Material';
-export { Command, CommandLike, CommandBuffer } from './src/display/Command';
+export { ShaderDeclaration, ShaderDeclarationDecorator, VertexShader, FragmentShader, ShaderProgram, ShaderDataType } from './src/display/Shader';
+export { Material, MaterialDecorator, Uniform, UniformDecorator } from './src/display/Material';
+export { CommandLike, CommandBuffer } from './src/display/Command';
 export { VertexBuffer, VertexLayout, IndexBuffer, UniformBuffer, BufferUsage, Buffer } from './src/display/Buffer';
 export { Texture2D, Texture2DArray, TextureFormat } from './src/display/Texture';
 export { RenderTarget2D } from './src/display/RenderTarget';
-export { RenderState, DEFAULT_RENDER_STATE } from './src/display/RenderState';
+export { RenderState, RenderStateDecorator, DEFAULT_RENDER_STATE } from './src/display/RenderState';
 export { DisplayContext } from './src/display/DisplayContext';
 export { ResourceManager } from './src/display/ResourceManager';
 export { DisplayModule } from './src/display/DisplayModule';

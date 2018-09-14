@@ -7,40 +7,19 @@ export interface CommandLike {
     destroy?: (context: DisplayContext) => void;
 }
 
-export interface Command {
+export interface CommandBufferOptimizeOptions {
+    
+    /**
+     * Wheter to sort draw calls by materials
+     */
+    sortByMaterial?: boolean;
+
 
 }
 
-
-
-export function Command<T extends Command>(e?: T) {
-
-    const meta_ctor = CreateMetadataCtor((meta: T) => meta);
-    if (this instanceof Command) {
-        meta_ctor.apply(this, arguments);
-        return this;
-    }
-
-    return function CommandDecorator<TD extends CommandLike>(target: TD) {
-
-
-        // get annotations array for this type
-        let annotations = GetOrDefineMetadata(META_ANNOTATIONS, target, []);
-
-
-        // create the metadata
-        let meta_instance = new (<any>Command)(e);
-
-
-        // push the metadata
-        annotations.push(meta_instance);
-
-
-        return target;
-    }
-}
-
-
+/**
+ * Use the command buffer to submit graphic command to the display context
+ */
 export class CommandBuffer {
 
     private _commands: CommandLike[] = [];
@@ -50,6 +29,10 @@ export class CommandBuffer {
 
     }
 
+    /**
+     * Push a command onto the command buffer and compile it if necessary
+     * @param cmd 
+     */
     add(cmd: CommandLike) {
 
         this._commands.push(cmd);
@@ -60,6 +43,10 @@ export class CommandBuffer {
 
     }
 
+    /**
+     * Removes a command from the command buffer and destroy it if necessary
+     * @param cmd 
+     */
     remove(cmd: CommandLike) {
 
         let index = this._commands.indexOf(cmd);
@@ -75,6 +62,9 @@ export class CommandBuffer {
         }
     }
 
+    /**
+     * Submit the command buffer to the context
+     */
     submit() {
 
         const cmds = this._commands;
@@ -83,5 +73,32 @@ export class CommandBuffer {
         for (let i = 0, l = cmds.length; i < l; ++i) {
             cmds[i].call(context);
         }
+    }
+
+    /**
+     * TODO implement
+     */
+    optimize(options: CommandBufferOptimizeOptions) {
+
+    }
+
+    /**
+     * Destroy the command buffer and all of the commands
+     */
+    destroy() {
+
+        const cmds = this._commands;
+        const context = this.context;
+
+        for (let i = 0, l = cmds.length; i < l; ++i) {
+            let cmd = cmds[i];
+
+            if(typeof cmd.destroy === 'function') {
+                cmd.destroy(this.context);
+            }
+        }
+
+        this._commands.length = 0;
+
     }
 }

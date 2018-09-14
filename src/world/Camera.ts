@@ -15,7 +15,6 @@ export enum DirtyMatrix {
     All = World | View | Projection
 }
 
-
 /**
  * Base class for cameras
  */
@@ -50,11 +49,18 @@ export class Camera {
 
     }
 
+    /**
+     * Set the matrices as dirty
+     */
     set dirty(val: boolean) {
         this.dirtyFlag |= val ? DirtyMatrix.World | DirtyMatrix.View : 0;
         //this._projDirty = val;
     }
 
+
+    /**
+     * The world-space matrix for this camera
+     */
     get world() {
 
         if ((this.dirtyFlag & DirtyMatrix.World) != 0) {
@@ -66,6 +72,9 @@ export class Camera {
         return this._world;
     }
 
+    /**
+     * The view space matrix for this camera (world-space inverse)
+     */
     get view() {
 
         if ((this.dirtyFlag & (DirtyMatrix.World | DirtyMatrix.View)) != 0) {
@@ -77,6 +86,9 @@ export class Camera {
         return this._view;
     }
 
+    /**
+     * The projection matrix for this camera
+     */
     get projection() {
 
         if ((this.dirtyFlag & DirtyMatrix.Projection) != 0) {
@@ -87,6 +99,9 @@ export class Camera {
         return this._projection;
     }
 
+    /**
+     * The combined view and projection matrix
+     */
     get viewProjection() {
 
         if (this.dirtyFlag > 0) {
@@ -183,7 +198,9 @@ export class Camera {
 
 
 
-
+/**
+ * Perspective transformation camera
+ */
 export class PerspectiveCamera extends Camera {
 
 
@@ -195,10 +212,10 @@ export class PerspectiveCamera extends Camera {
 
     /**
      * Creates a new perspective camera
-     * @param {Number} fov
-     * @param {Number} aspect
-     * @param {Number} near
-     * @param {Number} far
+     * @param fov
+     * @param aspect
+     * @param near
+     * @param far
      */
     constructor(fov?: number, aspect?: number, near?: number, far?: number) {
         super();
@@ -263,7 +280,7 @@ export class PerspectiveCamera extends Camera {
      */
     protected updateProjection() {
 
-        var fov = ToDegrees(2 * Math.atan(Math.tan(ToRadians(this._fov) * 0.5) / this._zoom));
+        let fov = ToDegrees(2 * Math.atan(Math.tan(ToRadians(this._fov) * 0.5) / this._zoom));
 
         this._projection.makePerspective(fov, this._aspect, this._near, this._far);
     }
