@@ -22,7 +22,7 @@ export class Bounds3D {
     constructor() {
 
     }
-    
+
 }
 
 
@@ -46,13 +46,13 @@ export class BoundsSystem3D implements SystemLike {
 
         //console.log(bound_components);
 
-        for(let [id, comps] of entities) {
+        for (let [id, comps] of entities) {
 
             // grab transform
             let t: Transform3D = comps[0];
             let b: Bounds3D = comps[1];
-            
-            if(b.dirty || t.dirty) {
+
+            if (b.dirty || t.dirty) {
                 b.world.copy(b.local).applyMatrix4(t.world);
                 b.dirty = false;
             }

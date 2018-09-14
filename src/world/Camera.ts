@@ -181,7 +181,7 @@ export class Camera {
         var m = TEMP_MATRIX4.identity();
         m.lookAt(this._translation, point, this._up);
 
-        this._orientation.setFromRotationMatrix(m);
+        this._orientation.fromRotationMatrix(m);
 
         this.dirtyFlag |= DirtyMatrix.World | DirtyMatrix.View;
     }

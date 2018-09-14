@@ -1,4 +1,4 @@
-import { Type, FindMetadataOfType, CreateMetadataCtor, GetOrDefineMetadata, META_ANNOTATIONS, META_PROPERTIES, TypeDecorator, MakeTypeDecorator, MakePropertyDecorator } from '@uon/core';
+import { Type, FindMetadataOfType, META_ANNOTATIONS, TypeDecorator, MakeTypeDecorator, MakePropertyDecorator } from '@uon/core';
 
 import { ShaderDeclaration } from './Shader';
 

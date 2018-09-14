@@ -22,34 +22,34 @@ SOFTWARE.
 ********************************************************************************* */
 /*! @uon/engine */
 
-export { Color } from './src/Color';
-export { Timer } from './src/Timer';
+export * from './src/Color';
+export * from './src/Timer';
 
 // display
-export { GL_CONSTANT } from './src/display/GLConstant';
-export { ShaderDeclaration, ShaderDeclarationDecorator, VertexShader, FragmentShader, ShaderProgram, ShaderDataType } from './src/display/Shader';
-export { Material, MaterialDecorator, Uniform, UniformDecorator } from './src/display/Material';
-export { CommandLike, CommandBuffer } from './src/display/Command';
-export { VertexBuffer, VertexLayout, IndexBuffer, UniformBuffer, BufferUsage, Buffer } from './src/display/Buffer';
-export { Texture2D, Texture2DArray, TextureFormat } from './src/display/Texture';
-export { RenderTarget2D } from './src/display/RenderTarget';
-export { RenderState, RenderStateDecorator, DEFAULT_RENDER_STATE } from './src/display/RenderState';
-export { DisplayContext } from './src/display/DisplayContext';
-export { ResourceManager } from './src/display/ResourceManager';
-export { DisplayModule } from './src/display/DisplayModule';
+export * from './src/display/GLConstant';
+export * from './src/display/Shader';
+export * from './src/display/Material';
+export * from './src/display/Command';
+export * from './src/display/Buffer';
+export * from './src/display/Texture';
+export * from './src/display/RenderTarget';
+export * from './src/display/RenderState';
+export * from './src/display/DisplayContext';
+export * from './src/display/ResourceManager';
+export * from './src/display/DisplayModule';
 
-export { ClearCommand } from './src/display/commands/Clear';
-export { SetViewportCommand } from './src/display/commands/SetViewport';
-export { DrawArraysCommand } from './src/display/commands/DrawArrays';
-export { DrawElementsCommand } from './src/display/commands/DrawElements';
-export { SetMaterialCommand } from './src/display/commands/SetMaterial';
-export { SetUniformsCommand } from './src/display/commands/SetUniforms';
+export * from './src/display/commands/Clear';
+export * from './src/display/commands/SetViewport';
+export * from './src/display/commands/DrawArrays';
+export * from './src/display/commands/DrawElements';
+export * from './src/display/commands/SetMaterial';
+export * from './src/display/commands/SetUniforms';
 
 // world
-export { World } from './src/world/World';
-export { System, SystemLike } from './src/world/System';
-export { Component } from './src/world/Component';
-export { Camera, PerspectiveCamera } from './src/world/Camera';
+export * from './src/world/World';
+export * from './src/world/System';
+export * from './src/world/Component';
+export * from './src/world/Camera';
 
-export { Transform3D, TransformSystem3D } from './src/world/systems/TransformSystem3D';
-export { Bounds3D, BoundsSystem3D } from './src/world/systems/BoundsSystem3D';
+export * from './src/world/systems/TransformSystem3D';
+export * from './src/world/systems/BoundsSystem3D';
