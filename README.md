@@ -5,5 +5,5 @@ A simple WebGL2 game engine framework
 ## Usage
 
 ```shell
-npm install @uon/engine --save
+npm i @uon/engine
 ```

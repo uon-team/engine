@@ -103,7 +103,7 @@ function GetShaderDeclarations(list: Type<any>[], out: ShaderDeclaration[]) {
     for (let i = 0; i < list.length; ++i) {
 
         let item = list[i];
-        let sd: ShaderDeclaration = FindMetadataOfType(META_ANNOTATIONS, item, ShaderDeclaration as any);
+        let sd = FindMetadataOfType(META_ANNOTATIONS, item, ShaderDeclaration);
 
         if (sd) {
 

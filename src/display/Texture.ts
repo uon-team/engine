@@ -302,6 +302,7 @@ export class Texture2DArray extends Texture {
 
 /**
  * 3D Texture
+ * TODO implement Texture3D
  */
 export class Texture3D extends Texture {
 
