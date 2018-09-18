@@ -1,4 +1,4 @@
-import { Type, FindMetadataOfType, META_ANNOTATIONS, TypeDecorator, MakeTypeDecorator, MakePropertyDecorator } from '@uon/core';
+import { Type, FindMetadataOfType, META_ANNOTATIONS, TypeDecorator, MakeTypeDecorator, MakePropertyDecorator, GetMetadata } from '@uon/core';
 
 import { ShaderDeclaration } from './Shader';
 
@@ -41,7 +41,7 @@ export interface UniformDecorator {
 export const Uniform: UniformDecorator = MakePropertyDecorator("Uniform", (meta: Uniform) => meta, null, (cls: any, meta: Uniform, key: any) => {
 
     meta = meta || { name: key };
-    meta.type = Reflect.getMetadata('design:type', cls, key);
+    meta.type = GetMetadata('design:type', cls, key);
 
 });
 
