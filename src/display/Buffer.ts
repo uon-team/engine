@@ -24,7 +24,7 @@ export class Buffer {
 
     protected _id: WebGLBuffer;
     constructor(
-        protected _gl: WebGL2RenderingContext,
+        protected _gl: WebGLRenderingContext,
         protected _target: number,
         protected _usage: BufferUsage) {
 
@@ -50,8 +50,10 @@ export class Buffer {
      * Delete the buffer on the gpu
      */
     release() {
-        this._gl.deleteBuffer(this._id);
-        this._id = null;
+        if(this._id) {
+            this._gl.deleteBuffer(this._id);
+            this._id = null;
+        }
     }
 }
 
@@ -70,7 +72,7 @@ export class IndexBuffer extends Buffer {
      * @param gl 
      * @param usage 
      */
-    constructor(gl: WebGL2RenderingContext, usage: BufferUsage = BufferUsage.StaticDraw) {
+    constructor(gl: WebGLRenderingContext, usage: BufferUsage = BufferUsage.StaticDraw) {
         super(gl, gl.ELEMENT_ARRAY_BUFFER, usage);
 
     }
@@ -151,7 +153,7 @@ export class VertexBuffer extends Buffer {
      * @param gl 
      * @param usage 
      */
-    constructor(gl: WebGL2RenderingContext, usage: BufferUsage = BufferUsage.StaticDraw) {
+    constructor(gl: WebGLRenderingContext, usage: BufferUsage = BufferUsage.StaticDraw) {
         super(gl, gl.ARRAY_BUFFER, usage);
 
 
@@ -214,8 +216,8 @@ export class UniformBuffer extends Buffer {
      * @param gl 
      * @param usage 
      */
-    constructor(gl: WebGL2RenderingContext, usage: BufferUsage = BufferUsage.DynamicDraw) {
-        super(gl, gl.UNIFORM_BUFFER, usage);
+    constructor(gl: WebGLRenderingContext, usage: BufferUsage = BufferUsage.DynamicDraw) {
+        super(gl, (gl as any).UNIFORM_BUFFER || null, usage);
 
     }
 

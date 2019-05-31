@@ -1,4 +1,4 @@
-import { GL_CONSTANT } from './GLConstant';
+import { GL_CONSTANT, RequireWebGL2 } from './GLConstant';
 
 export type ImageType = ImageBitmap | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
 
@@ -25,7 +25,7 @@ export enum TextureFormat {
     RG32F = GL_CONSTANT.RG32F,
 
     /** 3 components */
-    RGB8 = GL_CONSTANT.RGB8,
+    RGB8 = GL_CONSTANT.RGB,
     RGB16F = GL_CONSTANT.RGB16F,
     RGB32F = GL_CONSTANT.RGB32F,
 
@@ -63,7 +63,7 @@ export class Texture {
     protected _format: TextureFormat;
 
     constructor(
-        protected _gl: WebGL2RenderingContext,
+        protected _gl: WebGLRenderingContext,
         protected _target: number,
         protected _options: TextureCreationOptions
     ) {
@@ -87,8 +87,10 @@ export class Texture {
 
 
     release() {
-        this._gl.deleteTexture(this._id);
-        this._id = null;
+        if(this._id) {
+            this._gl.deleteTexture(this._id);
+            this._id = null;
+        }
 
     }
 
@@ -109,7 +111,7 @@ export class Texture2D extends Texture {
      * @param gl 
      * @param options 
      */
-    constructor(gl: WebGL2RenderingContext, options: TextureCreationOptions) {
+    constructor(gl: WebGLRenderingContext, options: TextureCreationOptions) {
         super(gl, gl.TEXTURE_2D, options);
 
 
@@ -178,8 +180,8 @@ export class Texture2D extends Texture {
             let image = options.image;
 
             // set pixel store attributes
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
             gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 
             let format = options.format || TextureFormat.RGBA8;
@@ -200,8 +202,10 @@ export class Texture2D extends Texture {
                 gl.generateMipmap(this._target);
             }
         }
+
+        // FIXME should be debug only
         else {
-            throw new Error(`Texture2D.reallocate didn't do anything`);
+           // throw new Error(`Texture2D.reallocate didn't do anything`);
         }
     }
 
@@ -218,8 +222,10 @@ export class Texture2DArray extends Texture {
     private _depth: number = 1;
 
 
-    constructor(gl: WebGL2RenderingContext, options: TextureCreationOptions) {
-        super(gl, gl.TEXTURE_2D_ARRAY, options);
+    constructor(gl: WebGLRenderingContext, options: TextureCreationOptions) {
+        super(gl, (gl as any).TEXTURE_2D_ARRAY, options);
+
+        RequireWebGL2(gl);
 
         this.reallocate(options);
 
@@ -253,7 +259,7 @@ export class Texture2DArray extends Texture {
      */
     reallocate(options: TextureCreationOptions) {
 
-        const gl = this._gl;
+        const gl = this._gl as WebGL2RenderingContext;
         const target = this._target;
 
         gl.bindTexture(target, this._id);
@@ -311,8 +317,10 @@ export class Texture3D extends Texture {
     private _depth: number;
 
 
-    constructor(gl: WebGL2RenderingContext, options: TextureCreationOptions) {
-        super(gl, gl.TEXTURE_3D, options);
+    constructor(gl: WebGLRenderingContext, options: TextureCreationOptions) {
+        super(gl, (gl as any).TEXTURE_3D, options);
+
+        RequireWebGL2(gl);
 
 
     }

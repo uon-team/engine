@@ -11,7 +11,17 @@ export const CANVAS_ELEMENT = new InjectionToken<HTMLCanvasElement>("HTMLCanvasE
 
 export interface DisplayContextConfig {
 
+    /**
+     * The canvas element on which to initialize a context 
+     */
     canvas: HTMLCanvasElement;
+
+    /**
+     * Force the creation of a webgl v1 context even if WebGL2 is supported
+     */
+    forceWebGL1?: boolean;
+
+
     providers?: Provider[];
     declarations?: Type<any>[];
     injector?: Injector;
@@ -21,7 +31,7 @@ export interface DisplayContextConfig {
 export class DisplayContext {
 
     private _injector: Injector
-    private _gl: WebGL2RenderingContext;
+    private _gl: WebGLRenderingContext | WebGL2RenderingContext;
     private _extensions: any;
     private _canvas: HTMLCanvasElement;
     private _resourceManager: ResourceManager; 
@@ -108,15 +118,20 @@ export class DisplayContext {
             depth: true,
             stencil: true,
             antialias: true,
-            premultipliedAlpha: false,
+            premultipliedAlpha: true,
             preserveDrawingBuffer: false
         };
 
+
+        let context_type = this._config.forceWebGL1 ? 'webgl' : 'webgl2';
+        console.log(context_type);
+
         // the gl context
-        this._gl = <WebGL2RenderingContext>this._canvas.getContext("webgl2", context_options);
+        this._gl = <WebGLRenderingContext>this._canvas.getContext(context_type, context_options) ||
+             <WebGLRenderingContext>this._canvas.getContext('webgl', context_options);
 
         if (!this._gl) {
-            throw new Error('Counldnt get webgl2 context from canvas');
+            throw new Error('Counldnt get webgl context from canvas');
         }
 
 

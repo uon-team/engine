@@ -27,7 +27,8 @@ export class RenderTarget {
     protected _fbo: WebGLFramebuffer;
 
     constructor(
-        protected _gl: WebGL2RenderingContext
+        protected _gl: WebGLRenderingContext,
+        protected _target: number
     ) {
 
         this._fbo = _gl.createFramebuffer();
@@ -36,6 +37,10 @@ export class RenderTarget {
 
     get id() {
         return this._fbo;
+    }
+
+    get target() {
+        return this._target;
     }
 
     release() {
@@ -56,11 +61,10 @@ export class RenderTarget2D extends RenderTarget {
     private _depth: Texture2D;
 
 
-    constructor(gl: WebGL2RenderingContext, options: RenderTargetCreationOptions) {
-        super(gl);
+    constructor(gl: WebGLRenderingContext, options: RenderTargetCreationOptions) {
+        super(gl, (gl as any).DRAW_FRAMEBUFFER || gl.FRAMEBUFFER);
 
-
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this._fbo);
+        gl.bindFramebuffer(this._target, this._fbo);
 
         if (options.format) {
 
@@ -76,7 +80,7 @@ export class RenderTarget2D extends RenderTarget {
             this._color = new Texture2D(gl, color_options);
 
             // attach
-            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, this._color.target, this._color.id, 0);
+            gl.framebufferTexture2D(this._target, gl.COLOR_ATTACHMENT0, this._color.target, this._color.id, 0);
 
 
         }
@@ -97,7 +101,7 @@ export class RenderTarget2D extends RenderTarget {
             this._depth = new Texture2D(gl, depth_options);
 
             // attach to fbo
-            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,
+            gl.framebufferTexture2D(this._target,
                 depth_format == TextureFormat.D24S8 ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT,
                 gl.TEXTURE_2D,
                 this._depth.id,
@@ -106,13 +110,13 @@ export class RenderTarget2D extends RenderTarget {
         }
 
 
-        let status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
+        let status = gl.checkFramebufferStatus(this._target);
         if (status != gl.FRAMEBUFFER_COMPLETE) {
             throw new Error(`Error creating framebuffer: ${status.toString(16)}`);
         }
 
 
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+        gl.bindFramebuffer(this._target, null);
 
 
     }
@@ -166,8 +170,8 @@ export class MultipleRenderTarget2D extends RenderTarget {
     private _textures: Texture2D[];
     private _depth: Texture2D;
 
-    constructor(gl: WebGL2RenderingContext, textures: Texture2D[], depthFormat?: TextureFormat) {
-        super(gl);
+    constructor(gl: WebGLRenderingContext, textures: Texture2D[], depthFormat?: TextureFormat) {
+        super(gl, (gl as any).DRAW_FRAMEBUFFER || gl.FRAMEBUFFER);
 
 
         if(textures.length < 2) {
@@ -178,7 +182,7 @@ export class MultipleRenderTarget2D extends RenderTarget {
         let width = Number.MAX_VALUE;
         let height = Number.MAX_VALUE;
 
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this._fbo);
+        gl.bindFramebuffer(this._target, this._fbo);
 
         // TODO require all textures to be the same size?
 
@@ -189,7 +193,7 @@ export class MultipleRenderTarget2D extends RenderTarget {
             height = Math.min(tex.height, height);
 
             // attach
-            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, tex.target, tex.id, 0);
+            gl.framebufferTexture2D(this._target, gl.COLOR_ATTACHMENT0 + i, tex.target, tex.id, 0);
         }
 
 
@@ -206,7 +210,7 @@ export class MultipleRenderTarget2D extends RenderTarget {
             this._depth = new Texture2D(gl, depth_options);
 
             // attach to fbo
-            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,
+            gl.framebufferTexture2D(this._target,
                 depthFormat == TextureFormat.D24S8 ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT,
                 gl.TEXTURE_2D,
                 this._depth.id,
@@ -215,7 +219,7 @@ export class MultipleRenderTarget2D extends RenderTarget {
         }
 
 
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+        gl.bindFramebuffer(this._target, null);
 
     }
 

@@ -1,11 +1,11 @@
 
 
-import { CreateMetadataCtor, GetOrDefineMetadata, META_ANNOTATIONS, Provider, TypeDecorator, MakeTypeDecorator } from '@uon/core';
+import { TypeDecorator, MakeTypeDecorator, Type } from '@uon/core';
 
 
 
 export interface EntityDecorator {
-    (meta?: Entity): TypeDecorator;
+    (meta: Entity): TypeDecorator;
     new(meta: Entity): Entity
 }
 
@@ -26,7 +26,9 @@ export interface Entity {
 
 
     /**
-     * Optional list of providers when creating an entity of this type
+     * The components type to instanciate upon creating the entity
      */
-    providers?: Provider[];
+    components: Type<any>[];
+
+
 }

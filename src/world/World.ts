@@ -1,9 +1,14 @@
-import { Type, Injector, GetInjectionTokens, Provider, FindMetadataOfType, META_ANNOTATIONS } from '@uon/core';
+import { Type, Injector, Provider, FindMetadataOfType, META_ANNOTATIONS } from '@uon/core';
 
 
 import { System, SystemLike } from './System';
-import { Timer } from '../Timer';
+import { Timer } from '../utils/Timer';
+import { Entity } from './Entity';
 
+interface EntityInstance<T> {
+    id: number;
+    instance: T;
+}
 
 /**
  * The main interface for this ECS implementation
@@ -11,18 +16,16 @@ import { Timer } from '../Timer';
 export class World {
 
     private _injector: Injector;
-    private _entities: any[];
+    private _entities: EntityInstance<any>[] = [];
 
 
     private _systems: SystemLike[] = [];
     private _systemMeta = new Map<Type<any>, System>();
 
-
     private _entityComponents: any[][] = [];
     private _freeIds: number[] = [];
 
     private _componentsByType = new Map<Type<any>, any[]>();
-
     private _componentsBySystem = new Map<Type<any>, Map<number, any[]>>();
 
     private _timer: Timer;
@@ -31,7 +34,7 @@ export class World {
      * Creates a new world
      * @param systems 
      */
-    constructor(systems: Type<SystemLike>[]) {
+    constructor(systems: Type<SystemLike>[], extraProviders: Provider[] = []) {
 
         this._timer = new Timer();
         this._timer.start();
@@ -47,6 +50,7 @@ export class World {
             }
         ];
 
+        providers = providers.concat(extraProviders);
         providers = providers.concat(systems);
 
         // create the injector for system instanciation
@@ -87,6 +91,13 @@ export class World {
     }
 
     /**
+     * Access to the World root injector
+     */
+    get injector() {
+        return this._injector;
+    }
+
+    /**
      * Get a system instance by type
      * @param type 
      */
@@ -98,19 +109,55 @@ export class World {
     /**
      * Create an entity and it's component storage
      */
-    createEntity(): number {
+    createEntity<T>(type: Type<T>): T {
+
+        // find system meta data
+        let meta = FindMetadataOfType(META_ANNOTATIONS, type, Entity);
+
+        if (!meta) {
+            throw new Error(`Provided entity type ${type.name} must have an Entity decorator.`);
+        }
 
         let new_id = -1;
+        let index = 0;
+        let version = 0;
+
         if (this._freeIds.length) {
             new_id = this._freeIds.shift();
+
+            index = new_id >> 8;
+            version = (new_id & ((1 << 8) - 1)) + 1;
+            version = version > 255 ? 0 : version; // wrap around
         }
         else {
-            new_id = this._entityComponents.length;
+            index = this._entityComponents.length;
+            version++;
         }
 
-        this._entityComponents[new_id] = [];
+        new_id = (index << 8) | version;
+        this._entityComponents[index] = [];
 
-        return new_id;
+        let providers: Provider[] = [];
+
+        let injector: Injector;
+        meta.components.forEach((t) => {
+            providers.push({
+                token: t,
+                factory: () => {
+                    return this.addComponent(new_id, t, injector);
+                }
+            });
+        });
+
+        injector = Injector.Create(providers, this._injector);
+        let instance = injector.instanciate(type);
+
+        this._entities[index] = {
+            id: new_id,
+            instance
+        };
+
+        return instance;
     }
 
 
@@ -120,8 +167,18 @@ export class World {
      */
     destroyEntity(id: number) {
 
+        let index = id >> 8;
+        let version = (id & ((1 << 8) - 1));
 
-        let comps = this._entityComponents[id];
+        let current = this._entities[index];
+        // make sure version is correct
+        if (!current || (current && current.id !== id)) {
+            console.warn(`Entity at location ${index} no longer exists.
+                version provided ${version}, expected ${current.id & ((1 << 8) - 1)}`)
+            return;
+        }
+
+        let comps = this._entityComponents[index];
         if (comps) {
 
             for (let i = 0; i < comps.length; ++i) {
@@ -131,7 +188,8 @@ export class World {
 
             this.removeFromSytems(id);
 
-            this._entityComponents[id] = null;
+            this._entityComponents[index] = null;
+            this._entities[index] = null;
             this._freeIds.push(id);
 
 
@@ -145,7 +203,17 @@ export class World {
      */
     getEntityComponents(id: number) {
 
-        return this._entityComponents[id];
+        let index = id >> 8;
+        let version = (id & ((1 << 8) - 1));
+        let current = this._entities[index];
+        // make sure version is correct
+        if (!current || (current && current.id !== id)) {
+            console.warn(`Entity at location ${index} no longer exists.
+                version provided ${version}, expected ${current.id & ((1 << 8) - 1)}`)
+            return;
+        }
+
+        return this._entityComponents[index];
     }
 
 
@@ -154,10 +222,20 @@ export class World {
      * @param entityId 
      * @param type 
      */
-    addComponent<T>(entityId: number, type: Type<T>): T {
+    addComponent<T>(entityId: number, type: Type<T>, injector?: Injector): T {
 
+        let index = entityId >> 8;
+        let version = (entityId & ((1 << 8) - 1));
 
-        let comps = this._entityComponents[entityId];
+        /*let current = this._entities[index];
+        // make sure version is correct
+        if (!current || (current && current.id !== entityId)) {
+            console.warn(`Entity at location ${index} no longer exists.
+                version provided ${version}, expected ${current.id & ((1 << 8) - 1)}`)
+            return null;
+        }*/
+
+        let comps = this._entityComponents[index];
 
         if (!comps) {
             throw new Error(`Entity with id ${entityId} does not exist.`);
@@ -171,7 +249,7 @@ export class World {
             }
         }
 
-        let comp = new (type as any)();
+        let comp = injector ? injector.instanciate(type) : new (type as any)();
         comps.push(comp);
         this.addToComponents(type, comp);
 
@@ -188,7 +266,18 @@ export class World {
      */
     removeComponent(entityId: number, type: Type<any>) {
 
-        let comps = this._entityComponents[entityId];
+        let index = entityId >> 8;
+        let version = (entityId & ((1 << 8) - 1));
+
+        let current = this._entities[index];
+        // make sure version is correct
+        if (!current || (current && current.id !== entityId)) {
+            console.warn(`Entity at location ${index} no longer exists.
+                version provided ${version}, expected ${current.id & ((1 << 8) - 1)}`)
+            return;
+        }
+
+        let comps = this._entityComponents[index];
 
         if (comps) {
 
@@ -254,7 +343,6 @@ export class World {
         }
 
     }
-
 
 
     /**
@@ -345,8 +433,6 @@ export class World {
 
 
         }
-
-
 
     }
 

@@ -7,21 +7,22 @@ import { ShaderProgram } from "../Shader";
 
 export function BindAttributes(gl: WebGLRenderingContext, program: ShaderProgram, layout: VertexLayout) {
 
-    var vsize = layout.stride,
-        elements = layout.elements,
-        element;
-
+    let vsize = layout.stride,
+        elements = layout.elements;
 
     for (let i = 0; i < elements.length; i++) {
 
         let el = elements[i];
-        let loc = el.location !== undefined ? el.location : i;
-        gl.enableVertexAttribArray(loc);
-        gl.vertexAttribPointer(loc, el.count, gl.FLOAT, false, vsize, el.offset);
 
+        let vi = program.getVertexInputByName(el.name);
+        if(vi == undefined) {
+            continue;
+        }
 
+        gl.enableVertexAttribArray(vi.location);
+        gl.vertexAttribPointer(vi.location, el.count, gl.FLOAT, false, vsize, el.offset);
+        
     }
-
 
 }
 

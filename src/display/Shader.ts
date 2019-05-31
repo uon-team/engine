@@ -43,6 +43,11 @@ export interface FragmentOutput {
 
     name: string;
     type: ShaderDataType;
+
+    /**
+     * For GLSL 100
+     */
+    legacy?: string;
 }
 
 
@@ -101,7 +106,7 @@ export class ShaderBase {
      * @param _text 
      */
     constructor(
-        protected _gl: WebGL2RenderingContext,
+        protected _gl: WebGLRenderingContext,
         protected _type: number,
         protected _text: string
     ) {
@@ -119,8 +124,7 @@ export class ShaderBase {
         if (!_gl.getShaderParameter(this._id, _gl.COMPILE_STATUS)) {
 
             const log_info = _gl.getShaderInfoLog(this._id);
-            _gl.deleteShader(this._id);
-            this._id = null;
+            this.release();
             console.log(_text);
             throw new Error(log_info);
         }
@@ -142,6 +146,17 @@ export class ShaderBase {
         return this._id;
     }
 
+    /**
+     * 
+     */
+    release() {
+        if (this._id) {
+            this._gl.deleteShader(this._id);
+            this._id = null;
+        }
+
+    }
+
 }
 
 /**
@@ -150,7 +165,7 @@ export class ShaderBase {
 export class VertexShader extends ShaderBase {
 
 
-    constructor(gl: WebGL2RenderingContext, text: string) {
+    constructor(gl: WebGLRenderingContext, text: string) {
         super(gl, gl.VERTEX_SHADER, text);
 
     }
@@ -163,7 +178,7 @@ export class VertexShader extends ShaderBase {
 export class FragmentShader extends ShaderBase {
 
 
-    constructor(gl: WebGL2RenderingContext, text: string) {
+    constructor(gl: WebGLRenderingContext, text: string) {
         super(gl, gl.FRAGMENT_SHADER, text);
 
     }
@@ -179,6 +194,7 @@ export class ShaderProgram {
 
     private _uniforms: UniformInfo[] = [];
     private _vins: VertexInput[] = [];
+    private _attrByName: { [k: string]: VertexInput } = {};
 
     /**
      * Creates a shader program with a compiled vertex and fragment shader
@@ -186,7 +202,7 @@ export class ShaderProgram {
      * @param _vs 
      * @param _fs 
      */
-    constructor(protected _gl: WebGL2RenderingContext,
+    constructor(protected _gl: WebGLRenderingContext,
         protected _vs: VertexShader,
         protected _fs: FragmentShader) {
 
@@ -219,12 +235,14 @@ export class ShaderProgram {
             let loc = _gl.getAttribLocation(id, attr.name);
             _gl.bindAttribLocation(id, loc, attr.name);
 
-            this._vins.push({
+            let vin: VertexInput = {
                 name: attr.name,
                 type: attr.type,
                 size: attr.size,
                 location: loc
-            });
+            };
+            this._vins.push(vin);
+            this._attrByName[attr.name] = vin;
         }
 
 
@@ -267,6 +285,17 @@ export class ShaderProgram {
         return this._vins;
     }
 
+
+    getVertexInputByName(name: string) {
+        return this._attrByName[name];
+    }
+
+    release() {
+        if (this._id) {
+            this._gl.deleteProgram(this._id);
+            this._id = null;
+        }
+    }
 
 }
 

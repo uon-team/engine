@@ -3,7 +3,7 @@ import { Sphere } from '@uon/math';
 import { System, SystemLike } from "../System";
 import { Transform3D } from "./TransformSystem3D";
 import { World } from "../World";
-import { Timer } from "../../Timer";
+import { Timer } from "../../utils/Timer";
 
 
 import { Component } from "../Component";

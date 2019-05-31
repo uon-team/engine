@@ -7,3 +7,4 @@
 /src
 *.log
 index.ts
+tsconfig.json

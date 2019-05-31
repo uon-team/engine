@@ -1,5 +1,19 @@
 
-export const GL_CONSTANT: any  = {
+
+export function IsWebGL2(gl: WebGL2RenderingContext | WebGLRenderingContext) {
+    return (typeof WebGL2RenderingContext !== 'undefined'
+        && gl instanceof WebGL2RenderingContext);
+}
+
+export function RequireWebGL2(gl: WebGL2RenderingContext | WebGLRenderingContext) {
+
+    if (!IsWebGL2(gl)) {
+        throw new Error('WebGL2 support is required!');
+    }
+}
+
+
+export const GL_CONSTANT = {
     READ_BUFFER: 0x0C02,
     UNPACK_ROW_LENGTH: 0x0CF2,
     UNPACK_SKIP_ROWS: 0x0CF3,

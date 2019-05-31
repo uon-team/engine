@@ -1,6 +1,5 @@
 import { Type, FindMetadataOfType, META_ANNOTATIONS } from '@uon/core';
 import { DisplayContext } from '../DisplayContext';
-import { Color } from '../../Color';
 import { VertexBuffer, VertexLayout } from '../Buffer';
 import { BindAttributes } from './Utils';
 
@@ -8,10 +7,13 @@ export class DrawArraysCommand {
 
     private vertexCount: number;
 
+    private attrNames: string[] = [];
+
     constructor(public vertices: VertexBuffer, public topology: number) {
 
         this.vertexCount = vertices.count;
- 
+
+        this.attrNames
     }
 
     call(context: DisplayContext) {
@@ -20,6 +22,11 @@ export class DrawArraysCommand {
         const buffer = this.vertices;
 
         const current_program = context.states.program;
+
+        current_program.inputs.forEach((vi) => {
+            gl.disableVertexAttribArray(vi.location);
+        });
+
 
         gl.bindBuffer(buffer.target, buffer.id);
 

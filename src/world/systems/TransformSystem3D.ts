@@ -1,7 +1,7 @@
 import { System, SystemLike } from "../System";
 import { Component } from "../Component";
 import { World } from "../World";
-import { Timer } from "../../Timer";
+import { Timer } from "../../utils/Timer";
 
 import { Vector3, Matrix4, Quaternion } from '@uon/math';
 

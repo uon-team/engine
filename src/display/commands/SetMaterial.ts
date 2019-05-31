@@ -14,10 +14,10 @@ export class SetMaterialCommand implements CommandLike {
     private meta: Material;
     private uniforms: Uniform[];
 
-    private state: RenderState;
+    //private state: RenderState;
     private program: ShaderProgram;
 
-    constructor(private material: any) {
+    constructor(private material: any, private state: RenderState = null) {
 
         let ctor = material.constructor;
         this.meta = FindMetadataOfType(META_ANNOTATIONS, ctor, Material);
@@ -30,10 +30,10 @@ export class SetMaterialCommand implements CommandLike {
         this.uniforms = ExtractUniforms(ctor.prototype);
 
         // extract state
-        if (this.meta.state) {
+       /* if (this.meta.state) {
             this.state = FindMetadataOfType(META_ANNOTATIONS, this.meta.state, RenderState);
 
-        }
+        }*/
 
     }
 

@@ -1,0 +1,8 @@
+{
+    "name": "engine",
+    "projectType": "library",
+    "entry": "src/index.ts",
+    "options": {
+        "outputPath": "dist"
+    }
+}

@@ -24,7 +24,7 @@ export class StateManager {
      * @constructs
      * @param _gl 
      */
-    constructor(private _gl: WebGL2RenderingContext) {
+    constructor(private _gl: WebGLRenderingContext) {
 
         this._current = {};
 
@@ -61,7 +61,7 @@ export class StateManager {
         const gl = this._gl;
 
         let value = val ? val.id : null;
-        this._gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, value);
+        this._gl.bindFramebuffer(val.target, value);
 
         this._framebuffer = val;
 
@@ -121,7 +121,23 @@ export class StateManager {
         curr.frontFace = GL.getParameter(GL.FRONT_FACE);
 
         curr.depthTest = GL.getParameter(GL.DEPTH_TEST);
+        curr.depthFunc = GL.getParameter(GL.DEPTH_FUNC);
+        curr.depthMask = GL.getParameter(GL.DEPTH_WRITEMASK);
+
         curr.stencilTest = GL.getParameter(GL.STENCIL_TEST);
+        curr.stencilMask = GL.getParameter(GL.STENCIL_WRITEMASK);
+        curr.stencilOp = [
+            GL.getParameter(GL.STENCIL_FAIL),
+            GL.getParameter(GL.STENCIL_PASS_DEPTH_FAIL),
+            GL.getParameter(GL.STENCIL_PASS_DEPTH_PASS)
+        ];
+        curr.stencilFunc = [
+            GL.getParameter(GL.STENCIL_FUNC),
+            GL.getParameter(GL.STENCIL_REF),
+            GL.getParameter(GL.STENCIL_VALUE_MASK)
+        ];
+
+        curr.colorMask = GL.getParameter(GL.COLOR_WRITEMASK);
 
         curr.blend = GL.getParameter(GL.BLEND);
         curr.blendEquation = GL.getParameter(GL.BLEND_EQUATION);

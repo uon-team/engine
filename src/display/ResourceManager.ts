@@ -1,9 +1,15 @@
 import { Type, StringUtils, META_ANNOTATIONS, FindMetadataOfType } from '@uon/core';
-import { GL_CONSTANT } from './GLConstant';
+import { GL_CONSTANT, IsWebGL2 } from './GLConstant';
 import { Material } from './Material';
 import { ShaderDeclaration, ShaderBase, ShaderProgram, UniformInfo, UniformBlockInfo, ShaderDataType, VertexInput, VertexOutput, FragmentOutput, VertexShader, FragmentShader } from './Shader';
 
-const SHADER_DEFAULT_HEADER: string[] = [
+
+const SHADER_DEFAULT_HEADER_V1: string[] = [
+    'precision mediump float;',
+]
+
+
+const SHADER_DEFAULT_HEADER_V2: string[] = [
     '#version 300 es',
     'precision highp float;',
     'precision highp int;',
@@ -18,7 +24,7 @@ export class ResourceManager {
     private _materials = new Map<Material, ShaderProgram>();
     private _images: { [k: string]: HTMLImageElement } = {};
 
-    constructor(private _gl: WebGL2RenderingContext) {
+    constructor(private _gl: WebGLRenderingContext) {
 
 
     }
@@ -71,7 +77,7 @@ export class ResourceManager {
 
 
         // get shader text
-        let texts = GenShadersFromDeclarations(declarations);
+        let texts = IsWebGL2(this._gl) ? GenES300Shaders(declarations) : GenES100Shaders(declarations);
 
 
         let vs_hash = StringUtils.hash(texts.vs);
@@ -120,7 +126,8 @@ function GetShaderDeclarations(list: Type<any>[], out: ShaderDeclaration[]) {
     }
 }
 
-function GenShadersFromDeclarations(decls: ShaderDeclaration[]) {
+
+function GenES300Shaders(decls: ShaderDeclaration[]) {
 
     let vin: VertexInput[] = [];
     let vout: VertexOutput[] = [];
@@ -170,7 +177,7 @@ function GenShadersFromDeclarations(decls: ShaderDeclaration[]) {
     }
 
 
-    let vs = [SHADER_DEFAULT_HEADER.join('\n')];
+    let vs = [SHADER_DEFAULT_HEADER_V2.join('\n')];
     vs.push(uni.map(u => GetUniformStr(u)).join('\n'));
     vs.push(vin.map(u => GetVertexInputStr(u)).join('\n'));
     vs.push(vout.map(u => GetVertexOutputStr(u)).join('\n'));
@@ -182,7 +189,7 @@ function GenShadersFromDeclarations(decls: ShaderDeclaration[]) {
     //console.log(vs.join('\n'));
 
 
-    let fs = [SHADER_DEFAULT_HEADER.join('\n')];
+    let fs = [SHADER_DEFAULT_HEADER_V2.join('\n')];
     fs.push(uni.map(u => GetUniformStr(u)).join('\n'));
     fs.push(vout.map(u => GetFragmentInputStr(u)).join('\n'));
     fs.push(fout.map(u => GetFragmentOutputStr(u)).join('\n'));
@@ -203,24 +210,130 @@ function GenShadersFromDeclarations(decls: ShaderDeclaration[]) {
 
 }
 
+
+function GenES100Shaders(decls: ShaderDeclaration[]) {
+
+    let vin: VertexInput[] = [];
+    let vout: VertexOutput[] = [];
+    let fout: FragmentOutput[] = [];
+    let uni: (UniformInfo | UniformBlockInfo)[] = [];
+
+    let vs_defs: string[] = [];
+    let fs_defs: string[] = [];
+
+    let vs_parts: string[] = [];
+    let fs_parts: string[] = [];
+
+
+    let replaces: string[][] = [];
+
+    for (let i = 0; i < decls.length; ++i) {
+        let decl = decls[i];
+
+
+        if (decl.vin) {
+            vin = vin.concat(decl.vin);
+        }
+        if (decl.vout) {
+            vout = vout.concat(decl.vout);
+        }
+        if (decl.fout) {
+            fout = fout.concat(decl.fout);
+        }
+
+        if (decl.uniform) {
+            uni = uni.concat(decl.uniform);
+        }
+
+        if (decl.vsDefs) {
+            vs_defs.push(decl.vsDefs);
+        }
+
+        if (decl.fsDefs) {
+            fs_defs.push(decl.fsDefs);
+        }
+
+        if (decl.vs) {
+            vs_parts.push(decl.vs);
+        }
+
+        if (decl.fs) {
+            fs_parts.push(decl.fs);
+        }
+    }
+
+    fout.forEach((fo) => {
+
+        if(fo.legacy) {
+            replaces.push([fo.name, fo.legacy]);
+        }
+
+    });
+
+    fs_parts = fs_parts.map((fs) => {
+
+        let res = fs;
+        replaces.forEach((r) => {
+            res = res.replace(new RegExp(r[0], 'g'), r[1]);
+        });
+
+        return res;
+    });
+
+
+    let vs = [SHADER_DEFAULT_HEADER_V1.join('\n')];
+    vs.push(uni.map(u => GetUniformStr(u)).join('\n'));
+    vs.push(vin.map(u => GetVertexInputStr(u, 'attribute')).join('\n'));
+    vs.push(vout.map(u => GetVertexOutputStr(u, 'varying')).join('\n'));
+    vs.push(vs_defs.join('\n'));
+
+    vs.push(`void main(void) { `);
+    vs.push(vs_parts.join('\n\t'));
+    vs.push(`}`);
+    //console.log(vs.join('\n'));
+
+
+    let fs = [SHADER_DEFAULT_HEADER_V1.join('\n')];
+    fs.push(uni.map(u => GetUniformStr(u)).join('\n'));
+    fs.push(vout.map(u => GetFragmentInputStr(u, 'varying')).join('\n'));
+    //fs.push(fout.map(u => GetFragmentOutputStr(u)).join('\n'));
+
+    fs.push(fs_defs.join('\n'));
+
+    fs.push(`void main(void) { `);
+    fs.push(fs_parts.join('\n\t'));
+    fs.push(`}`);
+
+    //console.log(fs.join('\n'));
+
+    return {
+        vs: vs.join('\n'),
+        fs: fs.join('\n')
+    };
+
+
+}
+
+
 function GetUniformStr(u: UniformInfo | UniformBlockInfo) {
 
     return `uniform ${ShaderDataType[(u as UniformInfo).type]} ${u.name};`;
 }
 
-function GetVertexInputStr(u: VertexInput) {
+function GetVertexInputStr(u: VertexInput, keyword: string = 'in') {
 
-    return `layout(location = ${u.location}) in ${ShaderDataType[u.type]} ${u.name};`;
+    let res = keyword == 'in' ? `layout(location = ${u.location}) ` : '';
+    return res + `${keyword} ${ShaderDataType[u.type]} ${u.name};`;
 }
 
-function GetVertexOutputStr(u: VertexOutput) {
+function GetVertexOutputStr(u: VertexOutput, keyword: string = 'in') {
 
-    return `out ${ShaderDataType[u.type]} ${u.name};`;
+    return `${keyword} ${ShaderDataType[u.type]} ${u.name};`;
 }
 
-function GetFragmentInputStr(u: VertexOutput) {
+function GetFragmentInputStr(u: VertexOutput, keyword: string = 'in') {
 
-    return `in ${ShaderDataType[u.type]} ${u.name};`;
+    return `${keyword} ${ShaderDataType[u.type]} ${u.name};`;
 }
 
 
