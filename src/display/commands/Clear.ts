@@ -1,6 +1,6 @@
 
 import { DisplayContext } from '../DisplayContext';
-import { Color } from '../../utils/Color';
+import { Color } from '@uon/math';
 import { GL_CONSTANT } from '../GLConstant';
 
 export class ClearCommand {

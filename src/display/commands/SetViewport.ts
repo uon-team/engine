@@ -1,8 +1,8 @@
 
-import {DisplayContext} from '../DisplayContext';
+import { DisplayContext } from '../DisplayContext';
 
 export class SetViewportCommand {
-    
+
 
     constructor(public x: number, public y: number, public width: number, public height: number) {
 

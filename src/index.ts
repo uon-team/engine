@@ -6,7 +6,6 @@ MIT Licensed
 *********************************************************************************
 */
 
-export * from './utils/Color';
 export * from './utils/Timer';
 
 // display

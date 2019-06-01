@@ -1,20 +1,18 @@
 {
   "name": "@uon/engine",
   "version": "0.1.0",
-  "description": "A game engine framework (WebGL2 & WebGL2)",
+  "description": "A game engine framework (WebGL & WebGL2)",
   "main": "./dist/index.js",
   "scripts": {
     "prepublishOnly": "tsc -p ./ --outDir dist/"
   },
   "dependencies": {
     "@uon/core": "^0.9.0",
-    "@uon/math": "^0.9.0",
-    "reflect-metadata": "^0.1.10"
+    "@uon/math": "^0.9.0"
   },
   "devDependencies": {
     "@types/reflect-metadata": "0.0.5",
-    "@types/webgl2": "0.0.3",
-    "tslib": "^1.9.0"
+    "@types/webgl2": "0.0.3"
   },
   "repository": {
     "type": "git",
