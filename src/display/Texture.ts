@@ -1,8 +1,8 @@
-import { GL_CONSTANT, RequireWebGL2 } from './GLConstant';
+import { GL_CONSTANT, RequireWebGL2, IsWebGL2 } from './GLConstant';
+import { IsPowerOfTwo } from '@uon/math';
 
-export type ImageType = ImageBitmap | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
 
-
+export type ImageDataType = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
 
 
 /**
@@ -35,6 +35,7 @@ export enum TextureFormat {
     RGBA32F = GL_CONSTANT.RGBA32F,
 
 
+
 }
 
 
@@ -48,7 +49,8 @@ export interface TextureCreationOptions {
     depth?: number;
     format?: TextureFormat;
     mipmap?: boolean;
-    image?: ImageType;
+    image?: ImageDataType;
+    compressedImage?: ArrayBufferView;
 }
 
 
@@ -87,7 +89,7 @@ export class Texture {
 
 
     release() {
-        if(this._id) {
+        if (this._id) {
             this._gl.deleteTexture(this._id);
             this._id = null;
         }
@@ -143,6 +145,10 @@ export class Texture2D extends Texture {
         const gl = this._gl;
         const target = this._target;
 
+        if (options.compressedImage && options.image) {
+            throw new Error('cannot provide compressedImage and image at the same time.');
+        }
+
         gl.bindTexture(target, this._id);
 
         // set default texture parameters
@@ -174,22 +180,28 @@ export class Texture2D extends Texture {
             this._format = format;
 
         }
+        // compressed image
+        else if (options.compressedImage) {
+            // make sure format was passed
+
+
+
+        }
         // if image was passed
         else if (options.image) {
 
-            let image = options.image;
+            const image = options.image;
+            const format = options.format || TextureFormat.RGBA8;
 
             // set pixel store attributes
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
             gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 
-            let format = options.format || TextureFormat.RGBA8;
             // upload the image
-            // TODO try and support other image formats
             gl.texImage2D(this._target, 0, format, GetBaseFormat(format), GetFormatType(format), image);
 
-
+            // update texture params
             gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
@@ -198,15 +210,17 @@ export class Texture2D extends Texture {
             this._height = image.height;
             this._format = format;
 
-            if (options.mipmap === true) {
+            const is_p2 = IsPowerOfTwo(image.width) && IsPowerOfTwo(image.height);
+            const is_gl2 = IsWebGL2(gl);
+
+            // generate mipmap, WebGL1 only supports power of 2 textures for mipmap gen
+            if (options.mipmap === true 
+                && (is_gl2 || (!is_gl2 && is_p2))) {
+
                 gl.generateMipmap(this._target);
             }
         }
 
-        // FIXME should be debug only
-        else {
-           // throw new Error(`Texture2D.reallocate didn't do anything`);
-        }
     }
 
 }
@@ -296,9 +310,7 @@ export class Texture2DArray extends Texture {
             this._format = format;
 
         }
-        else {
-            throw new Error(`Texture2DArray.reallocate didn't do anything`);
-        }
+
     }
 
 
@@ -321,7 +333,6 @@ export class Texture3D extends Texture {
         super(gl, (gl as any).TEXTURE_3D, options);
 
         RequireWebGL2(gl);
-
 
     }
 

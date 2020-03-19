@@ -109,7 +109,7 @@ export class StateManager {
 
 
     /**
-     * Sync the currently the GL render states
+     * Sync the currently set GL render states
      */
     sync() {
 

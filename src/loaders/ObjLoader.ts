@@ -92,9 +92,6 @@ export class ObjLoader {
         const uvs: Vector2[] = [];
         const faces: number[][] = [];
 
-
-        const flattened: number[] = [];
-
         const flat_verts: Vector3[] = [];
         const flat_normals: Vector3[] = [];
         const flat_uvs: Vector2[] = [];
@@ -232,13 +229,27 @@ export class ObjLoader {
 
         }
 
+        const stride_elements = VERTEX_LAYOUT.stride / 4;
+        const flattened = new Array<number>(flat_verts.length * stride_elements);
+        let offset = 0;
+
         for (let i = 0; i < flat_verts.length; ++i) {
 
-            flattened.push(...flat_verts[i].toFloatArray())
-            flattened.push(...flat_normals[i].toFloatArray())
-            flattened.push(...flat_uvs[i].toFloatArray())
-            flattened.push(...flat_tan[i].toFloatArray())
-            flattened.push(...flat_bitan[i].toFloatArray());
+            flat_verts[i].toArray(flattened, offset);
+            offset += 3;
+
+            flat_normals[i].toArray(flattened, offset);
+            offset += 3;
+
+            flat_uvs[i].toArray(flattened, offset);
+            offset += 2;
+
+            flat_tan[i].toArray(flattened, offset);
+            offset += 3;
+
+            flat_bitan[i].toArray(flattened, offset);
+            offset += 3;
+
         }
 
         this._interlaced = new Float32Array(flattened);

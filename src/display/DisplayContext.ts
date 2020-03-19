@@ -131,7 +131,7 @@ export class DisplayContext {
              <WebGLRenderingContext>this._canvas.getContext('webgl', context_options);
 
         if (!this._gl) {
-            throw new Error('Counldnt get webgl context from canvas');
+            throw new Error(`Couldn't get webgl context from canvas`);
         }
 
 

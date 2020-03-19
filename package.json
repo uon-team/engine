@@ -4,7 +4,7 @@
   "description": "A game engine framework (WebGL & WebGL2)",
   "main": "./dist/index.js",
   "scripts": {
-    "prepublishOnly": "tsc -p ./ --outDir dist/"
+    "build": "uon build"
   },
   "dependencies": {
     "@uon/core": "^0.9.0",

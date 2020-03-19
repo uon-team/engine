@@ -1,5 +1,5 @@
 # UON ENGINE
-A simple WebGL2 game engine framework
+A simple WebGL2 (and WebGL1!) game engine framework
 
 
 ## Usage
@@ -23,14 +23,14 @@ Commands are responsible for keeping the command data and issuing state changes 
 
 ```typescript
 // create a display context
-let context  = new DisplayContext({ canvas: canvas_el_ref });
+const context  = new DisplayContext({ canvas: canvas_el_ref });
 
 // create a command buffer
-let cmd_buffer = new CommandBuffer(context);
+const cmd_buffer = new CommandBuffer(context);
 
 // create a clear command
-let clear_cmd = new ClearCommand();
-clear_cmd.color.r = 1.0; // set clear color to bright green
+const clear_cmd = new ClearCommand();
+clear_cmd.color.g = 1.0; // set clear color to bright green
 cmd_buffer.add(clear_cmd); // add the command to the buffer
 
 // submit the command buffer to the pipeline
@@ -81,7 +81,7 @@ and then combine them with @Material.
 #### Declaring shader parts
 
 ```typescript
-import {ShaderDeclaration, ShaderDataType} from '@uon/engine';
+import { ShaderDeclaration, ShaderDataType } from '@uon/engine';
 
 @ShaderDeclaration({
     vin: [
@@ -163,7 +163,7 @@ Note that we did not set u_World and U_ViewProjection as uniforms in the materia
 
 An implementation of Entity-Component-System.
 
-The World class provides the interface to manage entities, their components and the system used to update them.
+The World class provides the interface to manage entities, their components and the systems used to update them.
 
 ### Example:
 ```typescript

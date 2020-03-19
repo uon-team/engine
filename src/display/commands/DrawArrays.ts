@@ -5,15 +5,10 @@ import { BindAttributes } from './Utils';
 
 export class DrawArraysCommand {
 
-    private vertexCount: number;
 
-    private attrNames: string[] = [];
+    constructor(public vertices: VertexBuffer, 
+        public topology: number) {
 
-    constructor(public vertices: VertexBuffer, public topology: number) {
-
-        this.vertexCount = vertices.count;
-
-        this.attrNames
     }
 
     call(context: DisplayContext) {
@@ -32,7 +27,7 @@ export class DrawArraysCommand {
 
         BindAttributes(gl, current_program, buffer.layout);
 
-        gl.drawArrays(this.topology, 0, this.vertexCount);
+        gl.drawArrays(this.topology, 0, buffer.count);
 
 
     }

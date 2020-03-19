@@ -1,4 +1,4 @@
-import { GL_CONSTANT } from './GLConstant';
+import { GL_CONSTANT, RequireWebGL2 } from './GLConstant';
 
 
 export enum BufferUsage {
@@ -216,8 +216,11 @@ export class UniformBuffer extends Buffer {
      * @param gl 
      * @param usage 
      */
-    constructor(gl: WebGLRenderingContext, usage: BufferUsage = BufferUsage.DynamicDraw) {
-        super(gl, (gl as any).UNIFORM_BUFFER || null, usage);
+    constructor(gl: WebGL2RenderingContext, usage: BufferUsage = BufferUsage.DynamicDraw) {
+
+        RequireWebGL2(gl);
+
+        super(gl, gl.UNIFORM_BUFFER, usage);
 
     }
 

@@ -287,6 +287,117 @@ export class PerspectiveCamera extends Camera {
 
 };
 
+/**
+ * Orthographic camera
+ */
+export class OrthographicCamera extends Camera {
 
+
+    private _left: number;
+    private _right: number;
+    private _top: number;
+    private _bottom: number;
+    private _near: number;
+    private _far: number;
+    private _zoom: number;
+
+    /**
+     * Creates a new orthographic camera
+     * @param {Number} fov
+     * @param {Number} aspect
+     * @param {Number} near
+     * @param {Number} far
+     */
+    constructor(left: number, right: number, top: number, bottom: number, near?: number, far?: number) {
+        super();
+
+        this._left = left;
+        this._right = right;
+        this._top = top;
+        this._bottom = bottom;
+        this._near = near !== undefined ? near : 1e-6;
+        this._far = far !== undefined ? far : 1e27;
+        this._zoom = 1;
+
+    }
+
+    get left() {
+        return this._left;
+    }
+
+    set left(val) {
+        this._left = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+    get right() {
+        return this._right;
+    }
+
+    set right(val) {
+        this._right = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+    get top() {
+        return this._top;
+    }
+
+    set top(val) {
+        this._top = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+    get bottom() {
+        return this._bottom;
+    }
+
+    set bottom(val) {
+        this._bottom = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+    get zoom() {
+        return this._zoom;
+    }
+
+    set zoom(val) {
+        this._zoom = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+    get near() {
+        return this._near;
+    }
+
+    set near(val) {
+        this._near = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+    get far() {
+        return this._far;
+    }
+
+    set far(val) {
+        this._far = val;
+        this.dirtyFlag |= DirtyMatrix.Projection;
+    }
+
+
+    /**
+     * Update the projection matrix
+     */
+    protected updateProjection() {
+
+        let zoom = this._zoom;
+
+        this._projection.makeOrthographic(
+            this._left * zoom, this._right * zoom,
+            this._top * zoom, this._bottom * zoom,
+            this._near, this._far);
+    }
+
+};
 
 
